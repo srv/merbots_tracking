@@ -1,2 +1,2 @@
-# srv_objtracking
-SRV package for object tracking
+# MERBOTS object tracking
+SRV package for object tracking in [MERBOTS project](http://srv.uib.es/superion/)
