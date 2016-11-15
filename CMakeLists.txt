@@ -32,9 +32,7 @@ catkin_package(
 include_directories(include trackers ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
 
 # STRUCK Tracker Library
-add_subdirectory(
-	trackers/struck)
+add_subdirectory(trackers/struck)
 
 # STRUCK Tracker Library
-add_subdirectory(
-        trackers/kcf)
+add_subdirectory(trackers/kcf)
