@@ -8,7 +8,8 @@ endif(NOT WIN32)
 
 find_package(OpenCV REQUIRED)
 
-include_directories(   
+include_directories(
+    src
     ${OpenCV_INCLUDE_DIRS}
 )
 
