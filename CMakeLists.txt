@@ -8,7 +8,7 @@ file(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR} *.cxx *.cpp *.c *.py)
 file(GLOB_RECURSE LNCH ${CMAKE_CURRENT_SOURCE_DIR} *.launch)
 
 # Catkin dependencies
-find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs image_transport cv_bridge)
+find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs image_transport cv_bridge camera_calibration_parsers)
 
 # System dependencies
 find_package(OpenCV REQUIRED)
@@ -25,7 +25,7 @@ endif()
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES struck kcf
-    CATKIN_DEPENDS roscpp sensor_msgs image_transport cv_bridge
+    CATKIN_DEPENDS roscpp sensor_msgs image_transport cv_bridge camera_calibration_parsers
     DEPENDS OpenCV
 )
 
@@ -44,6 +44,16 @@ add_subdirectory(trackers/struck)
 
 # KCF Tracker Library
 add_subdirectory(trackers/kcf)
+
+# Sequence Publisher Node
+add_executable(seq_publisher
+        src/nodes/seq_publisher.cpp)
+target_link_libraries(seq_publisher ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
+
+# Target Selector
+add_executable(target_selector
+        src/nodes/target_selector.cpp)
+target_link_libraries(target_selector ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 # Detection and Tracking
 add_executable(det_and_track
