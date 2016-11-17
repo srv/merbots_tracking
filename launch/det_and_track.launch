@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+    <!-- Arguments -->
+    <arg name="img_topic" default="/seq_publisher/image_raw" />
+    <arg name="detector" default="SIFT" />
+    <arg name="descriptor" default="SIFT" />
+    <arg name="debug" default="true" />
+    <arg name="rep_error" default="3.0" />
+    <arg name="inliers" default="25" />
+    <arg name="target_from_file" default="/home/emilio/Escritorio/target.png" />
+    <arg name="use_camera" default="true" />
+    <arg name="tracker" default="struck" />
+
+    <!-- Detection and Tracking -->
+    <node pkg="merbots_tracking" type="det_and_track" name="det_and_track" output="screen">
+        <param name="detector" value="$(arg detector)" />
+        <param name="descriptor" value="$(arg descriptor)" />
+        <param name="debug" value="$(arg debug)" />
+        <param name="rep_error" value="$(arg rep_error)" />
+        <param name="inliers" value="$(arg inliers)" />
+        <param name="target_from_file" value="$(arg target_from_file)" />
+        <param name="use_camera" value="$(arg use_camera)" />
+        <param name="tracker" value="$(arg tracker)" />
+
+        <remap from="~image" to="$(arg img_topic)" />
+    </node>
+
+</launch>
