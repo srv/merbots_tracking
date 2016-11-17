@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.8.3)
 
 project(merbots_tracking)
 
+# Finding headers and launch files for QtCreator
+file(GLOB_RECURSE HDRS ${CMAKE_CURRENT_SOURCE_DIR} *.h *.hpp)
+file(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR} *.cxx *.cpp *.c *.py)
+file(GLOB_RECURSE LNCH ${CMAKE_CURRENT_SOURCE_DIR} *.launch)
+
 # Catkin dependencies
 find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs image_transport cv_bridge)
 
@@ -18,10 +23,10 @@ endif()
 
 # Defining the package
 catkin_package(
-    INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIRS}
-    LIBRARIES struck 
+    INCLUDE_DIRS include
+    LIBRARIES struck kcf
     CATKIN_DEPENDS roscpp sensor_msgs image_transport cv_bridge
-    DEPENDS
+    DEPENDS OpenCV
 )
 
 ###########
@@ -31,8 +36,25 @@ catkin_package(
 # Including directories.
 include_directories(include trackers ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
 
+# Custom target to include headers and launch files in QtCreator
+add_custom_target(dtarget_merbots_tracking SOURCES ${HDRS} ${SRCS} ${LNCH})
+
 # STRUCK Tracker Library
 add_subdirectory(trackers/struck)
 
-# STRUCK Tracker Library
+# KCF Tracker Library
 add_subdirectory(trackers/kcf)
+
+# Detection and Tracking
+add_executable(det_and_track
+    src/util/Params.cpp
+    src/util/PHOG.cpp
+    src/util/SharedData.cpp
+    src/threads/TargetDetector.cpp
+    src/threads/TargetTracker.cpp
+    include/merbots_tracking/wrappers/VisualTracker.h
+    src/wrappers/StruckVisualTracker.cpp
+    src/wrappers/KCFVisualTracker.cpp
+    src/nodes/det_and_track.cpp
+)
+target_link_libraries(det_and_track ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} struck kcf)
