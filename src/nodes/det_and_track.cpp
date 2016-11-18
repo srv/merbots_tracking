@@ -17,6 +17,10 @@
 Params* params;
 SharedData* sdata;
 
+// Threads
+TargetDetector* tdet;
+TargetTracker* ttrack;
+
 // Public publishers and subscribers
 ros::Publisher roi_pub;
 
@@ -152,12 +156,12 @@ int main(int argc, char** argv)
 
     // Threads
     // Target Detector Thread
-    TargetDetector tdet(nh, params, sdata);
-    boost::thread tdet_thread(&TargetDetector::run, &tdet);
+    tdet = new TargetDetector(nh, params, sdata);
+    boost::thread tdet_thread(&TargetDetector::run, tdet);
 
     // Target Tracker Thread
-    TargetTracker ttrack(nh, params, sdata);
-    boost::thread ttrack_thread(&TargetTracker::run, &ttrack);
+    ttrack = new TargetTracker(nh, params, sdata);
+    boost::thread ttrack_thread(&TargetTracker::run, ttrack);
 
     // Processing images
     if (params->use_camera)
