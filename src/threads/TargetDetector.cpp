@@ -95,7 +95,7 @@ void TargetDetector::run()
                     }
                 }
 
-                ROS_INFO("Inliers %i", total_inliers);
+                //ROS_INFO("Inliers %i", total_inliers);
 
                 if (!homography.empty() && total_inliers > p->det_inliers)
                 {
@@ -133,6 +133,17 @@ void TargetDetector::run()
                 if (!p->only_detection)
                 {
                     sdata->setStatus(TRACKING);
+                }
+            }
+            else
+            {
+                cv::Rect roi = sdata->getROI();
+                if (roi.width != 0 || roi.height != 0)
+                {
+                    // Cleaning the current ROI
+                    roi.width = 0;
+                    roi.height = 0;
+                    sdata->setROI(roi);
                 }
             }
         }
