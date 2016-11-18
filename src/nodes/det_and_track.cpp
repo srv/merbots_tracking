@@ -7,6 +7,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/RegionOfInterest.h>
 
+#include <merbots_tracking/SetTarget.h>
 #include <merbots_tracking/threads/TargetDetector.h>
 #include <merbots_tracking/threads/TargetTracker.h>
 #include <merbots_tracking/util/Params.h>
@@ -66,6 +67,26 @@ void processImage(const cv::Mat& image)
     }
 }
 
+// SetTarget service callback
+bool set_target(merbots_tracking::SetTarget::Request& req, merbots_tracking::SetTarget::Response& res)
+{
+    // Converting the image message to OpenCV format
+    cv_bridge::CvImageConstPtr cv_ptr;
+    try
+    {
+        sensor_msgs::Image img = static_cast<sensor_msgs::Image>(req.image);
+        sensor_msgs::ImageConstPtr img_ptr(&img);
+        cv_ptr = cv_bridge::toCvShare(img_ptr, img_ptr->encoding);
+    }
+    catch (cv_bridge::Exception& e)
+    {
+        ROS_ERROR("Error converting image to OpenCV format: %s", e.what());
+        return false;
+    }
+
+    sdata->setTarget(cv_ptr->image);
+}
+
 // Image ROS topic callback
 void image_callback(const sensor_msgs::ImageConstPtr& msg)
 {
@@ -111,7 +132,8 @@ int main(int argc, char** argv)
         ROS_INFO("Target loaded from: %s", params->det_target_from_file.c_str());
     }
 
-    // TODO Add set_target service
+    // SetTarget service
+    ros::ServiceServer serv_settgt = nh.advertiseService("set_target", set_target);
 
     // Region of Interest publisher
     roi_pub = nh.advertise<sensor_msgs::RegionOfInterest>("target", 1);
