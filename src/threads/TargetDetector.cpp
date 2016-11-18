@@ -129,8 +129,11 @@ void TargetDetector::run()
                 // Setting the current ROI
                 sdata->setROI(xmin, ymin, xmax - xmin, ymax - ymin);
 
-                // Changing to tracking
-                sdata->setStatus(TRACKING);
+                // Changing to tracking, if needed
+                if (!p->only_detection)
+                {
+                    sdata->setStatus(TRACKING);
+                }
             }
         }
 

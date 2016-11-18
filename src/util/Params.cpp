@@ -81,6 +81,10 @@ void Params::readParams(const ros::NodeHandle& nh)
     nh.param("use_camera", use_camera, true);
     ROS_INFO("[Params] Use camera: %s", use_camera ? "Yes":"No");
 
+    // Only performs object detection
+    nh.param("detect_only", only_detection, false);
+    ROS_INFO("[Params] Detection Only: %s", only_detection ? "Yes":"No");
+
     // Tracker
     nh.param<std::string>("tracker", track_tracker, "kcf");
     ROS_INFO("[Params] Tracker: %s", track_tracker.c_str());

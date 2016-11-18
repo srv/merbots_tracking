@@ -25,6 +25,7 @@ public:
     double det_resize;
     std::string det_target_from_file;
     bool use_camera;
+    bool only_detection;
 
     // Visual tracking parameters
     std::string track_tracker;
@@ -42,6 +43,7 @@ protected:
         det_resize(1.0),
         det_target_from_file(""),
         use_camera(true),
+        only_detection(false),
         track_tracker("kcf")
     {        
     }
