@@ -85,6 +85,12 @@ bool set_target(merbots_tracking::SetTarget::Request& req, merbots_tracking::Set
     }
 
     sdata->setTarget(cv_ptr->image);
+    if (sdata->getStatus() == TRACKING)
+    {
+        sdata->setStatus(DETECTION);
+    }
+
+    return true;
 }
 
 // Image ROS topic callback
