@@ -24,6 +24,7 @@ public:
     int det_inliers;
     double det_resize;
     std::string det_target_from_file;
+    double det_timer;
     bool use_camera;
     bool only_detection;
 
@@ -42,6 +43,7 @@ protected:
         det_inliers(25),
         det_resize(1.0),
         det_target_from_file(""),
+        det_timer(5.0),
         use_camera(true),
         only_detection(false),
         track_tracker("kcf")

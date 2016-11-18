@@ -77,6 +77,10 @@ void Params::readParams(const ros::NodeHandle& nh)
     nh.param<std::string>("target_from_file", det_target_from_file, "");
     ROS_INFO("[Params] Target from file: %s", det_target_from_file.c_str());
 
+    // Timer for detection phase
+    nh.param("det_timer", det_timer, 5.0);
+    ROS_INFO("[Params] Detection timer: %f", det_timer);
+
     // Use camera
     nh.param("use_camera", use_camera, true);
     ROS_INFO("[Params] Use camera: %s", use_camera ? "Yes":"No");

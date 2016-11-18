@@ -188,7 +188,7 @@ int main(int argc, char** argv)
     ttrack = new TargetTracker(nh, params, sdata);
     boost::thread ttrack_thread(&TargetTracker::run, ttrack);
 
-    ros::Timer timer_det = nh.createTimer(ros::Duration(3.0), &timer_det_cb);
+    ros::Timer timer_det = nh.createTimer(ros::Duration(params->det_timer), &timer_det_cb);
 
     // Processing images
     if (params->use_camera)
