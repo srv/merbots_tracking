@@ -123,6 +123,23 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
     processImage(cv_ptr->image);
 }
 
+// Detection phase timer
+void timer_det_cb(const ros::TimerEvent& event)
+{
+    // Update the state
+    if (sdata->getStatus() == TRACKING)
+    {
+        sdata->setStatus(DETECTION);
+        ttrack->reset();
+    }
+
+    // Cleaning the current roi
+    cv::Rect roi;
+    roi.width = 0;
+    roi.height = 0;
+    sdata->setROI(roi);
+}
+
 // Main function
 int main(int argc, char** argv)
 {
@@ -170,6 +187,8 @@ int main(int argc, char** argv)
     // Target Tracker Thread
     ttrack = new TargetTracker(nh, params, sdata);
     boost::thread ttrack_thread(&TargetTracker::run, ttrack);
+
+    ros::Timer timer_det = nh.createTimer(ros::Duration(3.0), &timer_det_cb);
 
     // Processing images
     if (params->use_camera)
