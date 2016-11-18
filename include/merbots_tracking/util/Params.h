@@ -22,6 +22,7 @@ public:
     cv::Ptr<cv::Feature2D> det_descriptor;
     double det_rerror;
     int det_inliers;
+    double det_resize;
     std::string det_target_from_file;
     bool use_camera;
 
@@ -38,6 +39,7 @@ protected:
         debug(true),
         det_rerror(3.0),
         det_inliers(25),
+        det_resize(1.0),
         det_target_from_file(""),
         use_camera(true),
         track_tracker("kcf")

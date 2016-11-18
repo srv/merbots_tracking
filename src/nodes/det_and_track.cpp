@@ -23,7 +23,7 @@ ros::Publisher roi_pub;
 void processImage(const cv::Mat& image)
 {
     cv::Mat timg;
-    cv::resize(image, timg, cv::Size(), 1.0, 1.0);
+    cv::resize(image, timg, cv::Size(), params->det_resize, params->det_resize);
 
     //sdata->setCurrentImage(image);
     sdata->setCurrentImage(timg);

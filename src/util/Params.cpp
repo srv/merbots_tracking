@@ -69,6 +69,10 @@ void Params::readParams(const ros::NodeHandle& nh)
     nh.param("inliers", det_inliers, 25);
     ROS_INFO("[Params] Number of inliers: %i", det_inliers);
 
+    // Resizing in target detection
+    nh.param("resize", det_resize, 1.0);
+    ROS_INFO("[Params] Resize in target detection: %f", det_resize);
+
     // Load target from file?
     nh.param<std::string>("target_from_file", det_target_from_file, "");
     ROS_INFO("[Params] Target from file: %s", det_target_from_file.c_str());
