@@ -88,11 +88,19 @@ bool set_target(merbots_tracking::SetTarget::Request& req, merbots_tracking::Set
         return false;
     }
 
+    // Update the state
     sdata->setTarget(cv_ptr->image);
     if (sdata->getStatus() == TRACKING)
     {
         sdata->setStatus(DETECTION);
+        ttrack->reset();
     }
+
+    // Cleaning the current roi
+    cv::Rect roi;
+    roi.width = 0;
+    roi.height = 0;
+    sdata->setROI(roi);
 
     return true;
 }
