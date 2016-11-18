@@ -73,8 +73,8 @@ void TargetTracker::run()
 
             if (change_stat)
             {
-                first_image = true;
                 sdata->setStatus(DETECTION);
+                reset();
                 curr_roi.width = 0;
                 curr_roi.height = 0;
                 sdata->setROI(curr_roi);
@@ -85,4 +85,9 @@ void TargetTracker::run()
         ros::spinOnce();
         r.sleep();
     }
+}
+
+void TargetTracker::reset()
+{
+    first_image = true; // WARNING Mutex?
 }

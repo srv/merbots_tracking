@@ -15,6 +15,7 @@ public:
     ~TargetTracker();
 
     void run();
+    void reset();
 
 private:
     ros::NodeHandle nh;
