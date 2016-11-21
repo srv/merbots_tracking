@@ -31,44 +31,6 @@ void processImage(const cv::Mat& image)
 
     //sdata->setCurrentImage(image);
     sdata->setCurrentImage(timg);
-
-    // Publishing the current ROI
-    cv::Rect roi = sdata->getROI();
-    bool existROI = roi.width > 0 && roi.height > 0;
-    if (existROI)
-    {
-        sensor_msgs::RegionOfInterest roi_msg;
-        roi_msg.x_offset = static_cast<unsigned>(roi.x);
-        roi_msg.y_offset = static_cast<unsigned>(roi.y);
-        roi_msg.width = static_cast<unsigned>(roi.width);
-        roi_msg.height = static_cast<unsigned>(roi.height);
-        roi_msg.do_rectify = 1;
-        roi_pub.publish(roi_msg);
-    }
-
-    // Publishing the image if needed
-    if (params->debug)
-    {
-        cv::Mat img;
-        timg.copyTo(img);
-
-        // Plotting the working mode in the image
-        if (sdata->getStatus() == DETECTION)
-        {
-            cv::putText(img, "D", cv::Point(30,30), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(0,255,0), 1, CV_AA);
-        }
-        else
-        {
-            cv::putText(img, "T", cv::Point(30,30), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(0,255,0), 1, CV_AA);
-        }
-
-        if (existROI)
-        {
-            cv::rectangle(img, roi, cv::Scalar(0,0, 255), 2);
-        }
-        cv::imshow("Detection and Tracking", img);
-        cv::waitKey(5);
-    }
 }
 
 // SetTarget service callback
@@ -140,6 +102,49 @@ void timer_det_cb(const ros::TimerEvent& event)
     sdata->setROI(roi);
 }
 
+void publish_data()
+{
+    // Publishing the current ROI
+    cv::Rect roi = sdata->getROI();
+    bool existROI = roi.width > 0 && roi.height > 0;
+
+    // Publishing ROI
+    if (existROI)
+    {
+        sensor_msgs::RegionOfInterest roi_msg;
+        roi_msg.x_offset = static_cast<unsigned>(roi.x);
+        roi_msg.y_offset = static_cast<unsigned>(roi.y);
+        roi_msg.width = static_cast<unsigned>(roi.width);
+        roi_msg.height = static_cast<unsigned>(roi.height);
+        roi_msg.do_rectify = 1;
+        roi_pub.publish(roi_msg);
+    }
+
+    // Publishing the image if needed
+    if (params->debug && sdata->existsImage())
+    {
+        cv::Mat img;
+        sdata->copyCurrentImage(img);
+
+        // Plotting the working mode in the image
+        if (sdata->getStatus() == DETECTION)
+        {
+            cv::putText(img, "D", cv::Point(30,30), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(0,255,0), 1, CV_AA);
+        }
+        else
+        {
+            cv::putText(img, "T", cv::Point(30,30), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(0,255,0), 1, CV_AA);
+        }
+
+        if (existROI)
+        {
+            cv::rectangle(img, roi, cv::Scalar(0,0, 255), 2);
+        }
+        cv::imshow("Detection and Tracking", img);
+        cv::waitKey(5);
+    }
+}
+
 // Main function
 int main(int argc, char** argv)
 {
@@ -207,6 +212,8 @@ int main(int argc, char** argv)
             {
                 break;
             }
+
+            publish_data();
         }
     }
     else
@@ -218,7 +225,11 @@ int main(int argc, char** argv)
         image_transport::Subscriber img_sub = it.subscribe("image", 0, image_callback);
 
         // Spinning the ROS execution
-        ros::spin();
+        while (ros::ok())
+        {
+            publish_data();
+            ros::spinOnce();
+        }
     }
 
     return 0;
