@@ -27,7 +27,7 @@ void Params::readParams(const ros::NodeHandle& nh)
     ROS_INFO("[Params] Detector: %s", str_det.c_str());
 	if (str_det == "SIFT")
 	{
-		det_detector = cv::xfeatures2d::SIFT::create();
+		det_detector = cv::xfeatures2d::SIFT::create(0, 3, 0.04, 10, 1.0);
 	}
 	else if (str_det == "SURF")
 	{
@@ -45,7 +45,7 @@ void Params::readParams(const ros::NodeHandle& nh)
     ROS_INFO("[Params] Descriptor: %s", str_des.c_str());
 	if (str_det == "SIFT")
 	{
-		det_descriptor = cv::xfeatures2d::SIFT::create();
+		det_descriptor = cv::xfeatures2d::SIFT::create(0, 3, 0.04, 10, 1.0);
 	}
 	else if (str_det == "SURF")
 	{
