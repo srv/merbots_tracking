@@ -61,7 +61,7 @@ void TargetTracker::run()
                 phog.describe(roi, roi_descr);
                 double distance = PHOG::distChiSquare(target_descr, roi_descr);
                 //std::cout << "Distance: " << distance << std::endl;
-                if (distance > 0.6)
+                if (distance > p->track_thresh)
                 {
                     change_stat = true;
                 }

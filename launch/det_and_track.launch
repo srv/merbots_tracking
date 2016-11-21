@@ -14,6 +14,7 @@
     <arg name="use_camera" default="true" />
     <arg name="detect_only" default="false" />
     <arg name="tracker" default="struck" />
+    <arg name="track_thresh" default="0.5" />
 
     <!-- Detection and Tracking -->
     <node pkg="merbots_tracking" type="det_and_track" name="det_and_track" output="screen">
@@ -28,6 +29,7 @@
         <param name="use_camera" value="$(arg use_camera)" />
         <param name="detect_only" value="$(arg detect_only)" />
         <param name="tracker" value="$(arg tracker)" />
+        <param name="track_thresh" value="$(arg track_thresh)" />
 
         <remap from="~image" to="$(arg img_topic)" />
     </node>

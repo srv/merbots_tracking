@@ -87,9 +87,13 @@ void Params::readParams(const ros::NodeHandle& nh)
 
     // Only performs object detection
     nh.param("detect_only", only_detection, false);
-    ROS_INFO("[Params] Detection Only: %s", only_detection ? "Yes":"No");
+    ROS_INFO("[Params] Detection only: %s", only_detection ? "Yes":"No");
 
     // Tracker
     nh.param<std::string>("tracker", track_tracker, "kcf");
     ROS_INFO("[Params] Tracker: %s", track_tracker.c_str());
+
+    // Threshold to determine whether the tracking is correct
+    nh.param("track_thresh", track_thresh, 0.5);
+    ROS_INFO("[Params] Tracking threshold: %f", track_thresh);
 }

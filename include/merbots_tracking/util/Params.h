@@ -30,6 +30,7 @@ public:
 
     // Visual tracking parameters
     std::string track_tracker;
+    double track_thresh;
 
     // Public functions
     static Params* getInstance();
@@ -46,7 +47,8 @@ protected:
         det_timer(5.0),
         use_camera(true),
         only_detection(false),
-        track_tracker("kcf")
+        track_tracker("struck"),
+        track_thresh(0.5)
     {        
     }
 
