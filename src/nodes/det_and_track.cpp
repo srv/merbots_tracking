@@ -34,7 +34,7 @@ void processImage(const cv::Mat& image)
 }
 
 // SetTarget service callback
-bool set_target(merbots_tracking::SetTarget::Request& req, merbots_tracking::SetTarget::Response& res)
+bool setTarget(merbots_tracking::SetTarget::Request &req, merbots_tracking::SetTarget::Response &res)
 {
     // Converting the image message to OpenCV format
     cv_bridge::CvImageConstPtr cv_ptr;
@@ -68,7 +68,7 @@ bool set_target(merbots_tracking::SetTarget::Request& req, merbots_tracking::Set
 }
 
 // Image ROS topic callback
-void image_callback(const sensor_msgs::ImageConstPtr& msg)
+void image_cb(const sensor_msgs::ImageConstPtr &msg)
 {
     // Converting the image message to OpenCV format
     cv_bridge::CvImageConstPtr cv_ptr;
@@ -86,7 +86,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
 }
 
 // Detection phase timer
-void timer_det_cb(const ros::TimerEvent& event)
+void timerDet_cb(const ros::TimerEvent &event)
 {
     // Update the state
     if (sdata->getStatus() == TRACKING)
@@ -102,7 +102,7 @@ void timer_det_cb(const ros::TimerEvent& event)
     sdata->setROI(roi);
 }
 
-void publish_data()
+void publishData()
 {
     // Publishing the current ROI
     cv::Rect roi = sdata->getROI();
@@ -173,7 +173,7 @@ int main(int argc, char** argv)
     }
 
     // SetTarget service
-    ros::ServiceServer serv_settgt = nh.advertiseService("set_target", set_target);
+    ros::ServiceServer serv_settgt = nh.advertiseService("setTarget", setTarget);
 
     // Region of Interest publisher
     roi_pub = nh.advertise<sensor_msgs::RegionOfInterest>("target", 1);
@@ -193,7 +193,7 @@ int main(int argc, char** argv)
     ttrack = new TargetTracker(nh, params, sdata);
     boost::thread ttrack_thread(&TargetTracker::run, ttrack);
 
-    ros::Timer timer_det = nh.createTimer(ros::Duration(params->det_timer), &timer_det_cb);
+    ros::Timer timer_det = nh.createTimer(ros::Duration(params->det_timer), &timerDet_cb);
 
     // Processing images
     if (params->use_camera)
@@ -213,7 +213,7 @@ int main(int argc, char** argv)
                 break;
             }
 
-            publish_data();
+            publishData();
         }
     }
     else
@@ -222,12 +222,12 @@ int main(int argc, char** argv)
 
         // Publishers and Subscribers
         image_transport::ImageTransport it(nh);
-        image_transport::Subscriber img_sub = it.subscribe("image", 0, image_callback);
+        image_transport::Subscriber img_sub = it.subscribe("image", 0, image_cb);
 
         // Spinning the ROS execution
         while (ros::ok())
         {
-            publish_data();
+            publishData();
             ros::spinOnce();
         }
     }
