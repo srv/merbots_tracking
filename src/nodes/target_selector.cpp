@@ -127,7 +127,7 @@ private:
 
         // Repainting the main window
         cv::Mat img;
-        if (curr_mode == DISPLAY)
+        if (curr_mode == DISPLAY || curr_mode == WAIT_IMAGE)
         {
             curr_image.copyTo(img);
         }
