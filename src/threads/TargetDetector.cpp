@@ -3,7 +3,8 @@
 TargetDetector::TargetDetector(const ros::NodeHandle& nodeh, Params* params, SharedData* shdata) :
     nh(nodeh),
     p(params),
-    sdata(shdata)
+    sdata(shdata),
+    obj_ind(0)
 {
     // Copying the current target
     if (sdata->existsTarget())
