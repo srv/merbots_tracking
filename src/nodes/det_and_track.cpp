@@ -52,6 +52,8 @@ bool setTarget(merbots_tracking::SetTarget::Request &req, merbots_tracking::SetT
 
     // Update the state
     sdata->setTarget(cv_ptr->image);
+    tdet->setTarget(cv_ptr->image);
+    ttrack->setTarget(cv_ptr->image);
     if (sdata->getStatus() == TRACKING)
     {
         sdata->setStatus(DETECTION);
