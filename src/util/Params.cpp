@@ -27,7 +27,7 @@ void Params::readParams(const ros::NodeHandle& nh)
     ROS_INFO("[Params] Detector: %s", str_det.c_str());
 	if (str_det == "SIFT")
 	{
-		det_detector = cv::xfeatures2d::SIFT::create(0, 3, 0.04, 10, 1.0);
+		det_detector = cv::xfeatures2d::SIFT::create(2000, 3, 0.01, 40, 1.0);
 	}
 	else if (str_det == "SURF")
 	{
