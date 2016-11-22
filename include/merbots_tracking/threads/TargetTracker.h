@@ -15,7 +15,9 @@ public:
     ~TargetTracker();
 
     void run();
+
     void reset();
+    void setTarget(const cv::Mat& image);
 
 private:
     ros::NodeHandle nh;

@@ -22,6 +22,8 @@ public:
     Status getStatus();
     void setTarget(const cv::Mat& image);
     cv::Mat getTarget();
+    void copyCurrentTarget(cv::Mat& image);
+    bool existsTarget();
     void setCurrentImage(const cv::Mat& image);
     cv::Mat getCurrentImage();
     void copyCurrentImage(cv::Mat& image);

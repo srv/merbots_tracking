@@ -20,8 +20,10 @@ TargetTracker::TargetTracker(const ros::NodeHandle& nodeh, Params* params, Share
         exit(0);
     }
 
-    cv::Mat target = sdata->getTarget();
-    phog.describe(target, target_descr);
+    if (sdata->existsTarget())
+    {
+        phog.describe(sdata->getTarget(), target_descr);
+    }
 }
 
 TargetTracker::~TargetTracker()
@@ -33,7 +35,7 @@ void TargetTracker::run()
     ros::Rate r(500);
     while (ros::ok())
     {
-        if (sdata->getStatus() == TRACKING && sdata->existsImage())
+        if (sdata->getStatus() == TRACKING && sdata->existsImage() && sdata->existsTarget())
         {            
             // Perform the tracking
             cv::Mat image = sdata->getCurrentImage();
@@ -90,4 +92,9 @@ void TargetTracker::run()
 void TargetTracker::reset()
 {
     first_image = true; // WARNING Mutex?
+}
+
+void TargetTracker::setTarget(const cv::Mat& image)
+{
+    phog.describe(image, target_descr);
 }

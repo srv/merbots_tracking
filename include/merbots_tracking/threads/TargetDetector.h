@@ -14,7 +14,10 @@ public:
 
     void run();
 
+    void setTarget(const cv::Mat& image);
+
 private:
+
     ros::NodeHandle nh;
 
     // Parameters

@@ -6,38 +6,10 @@ TargetDetector::TargetDetector(const ros::NodeHandle& nodeh, Params* params, Sha
     sdata(shdata)
 {
     // Copying the current target
-    cv::Mat obj_image = sdata->getTarget();
-    obj_image.copyTo(curr_target);
-
-    // Detecting and describing keypoints
-    p->det_detector->detect(curr_target, obj_kps);
-    ROS_INFO("Target: %i keypoints found", (int)obj_kps.size());
-    p->det_descriptor->compute(curr_target, obj_kps, obj_descs);
-    ROS_INFO("Target: %i descriptors found", (int)obj_descs.rows);
-
-    if(obj_descs.type() == CV_8U)
+    if (sdata->existsTarget())
     {
-        // Binary descriptors detected (from ORB or BRIEF)
-
-        // Create Flann LSH index
-        obj_ind = new cv::flann::Index(obj_descs, cv::flann::LshIndexParams(12, 20, 2), cvflann::FLANN_DIST_HAMMING);
+        setTarget(sdata->getTarget());
     }
-    else
-    {
-        // assume it is CV_32F
-        // Create a Flann KDTree index
-        obj_ind = new cv::flann::Index(obj_descs, cv::flann::KDTreeIndexParams(), cvflann::FLANN_DIST_EUCLIDEAN);
-    }
-
-    // Storing the corners of the target
-    obj_corners.clear();
-    obj_corners.push_back(cv::Point(0,0));
-    obj_corners.push_back(cv::Point(curr_target.cols, 0));
-    obj_corners.push_back(cv::Point(curr_target.cols, curr_target.rows));
-    obj_corners.push_back(cv::Point(0, curr_target.rows));
-
-    // cv::imshow("Target", curr_target);
-    // cv::waitKey(0);
 }
 
 TargetDetector::~TargetDetector()
@@ -49,7 +21,7 @@ void TargetDetector::run()
     ros::Rate r(500);
     while (ros::ok())
     {
-        if (sdata->getStatus() == DETECTION && sdata->existsImage())
+        if (sdata->getStatus() == DETECTION && sdata->existsImage() && sdata->existsTarget())
         {
             // Computes the detection
             cv::Mat image = sdata->getCurrentImage();
@@ -152,4 +124,48 @@ void TargetDetector::run()
         ros::spinOnce();
         r.sleep();
     }
+}
+
+void TargetDetector::setTarget(const cv::Mat& image)
+{
+    // Copying the current target
+    image.copyTo(curr_target);
+
+    ROS_INFO("New target received");
+
+    // Detecting and describing keypoints
+    obj_kps.clear();
+    p->det_detector->detect(curr_target, obj_kps);
+    ROS_INFO("Target: %i keypoints found", (int) obj_kps.size());
+    obj_descs.release();
+    p->det_descriptor->compute(curr_target, obj_kps, obj_descs);
+    ROS_INFO("Target: %i descriptors found", (int) obj_descs.rows);
+
+    if (obj_ind)
+    {
+        delete obj_ind;
+    }
+
+    if (obj_descs.type() == CV_8U)
+    {
+        // Binary descriptors detected (from ORB or BRIEF)
+
+        // Create Flann LSH index
+        obj_ind = new cv::flann::Index(obj_descs, cv::flann::LshIndexParams(12, 20, 2), cvflann::FLANN_DIST_HAMMING);
+    } else
+    {
+        // assume it is CV_32F
+        // Create a Flann KDTree index
+        obj_ind = new cv::flann::Index(obj_descs, cv::flann::KDTreeIndexParams(), cvflann::FLANN_DIST_EUCLIDEAN);
+    }
+
+    // Storing the corners of the target
+    obj_corners.clear();
+    obj_corners.push_back(cv::Point(0, 0));
+    obj_corners.push_back(cv::Point(curr_target.cols, 0));
+    obj_corners.push_back(cv::Point(curr_target.cols, curr_target.rows));
+    obj_corners.push_back(cv::Point(0, curr_target.rows));
+
+    // cv::imshow("Target", curr_target);
+    // cv::waitKey(0);
 }

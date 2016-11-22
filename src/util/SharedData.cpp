@@ -60,6 +60,18 @@ cv::Mat SharedData::getTarget()
     return target;
 }
 
+void SharedData::copyCurrentTarget(cv::Mat& image)
+{
+    boost::mutex::scoped_lock lock(mutex_target);
+    target.copyTo(image);
+}
+
+bool SharedData::existsTarget()
+{
+    boost::mutex::scoped_lock lock(mutex_target);
+    return !target.empty();
+}
+
 void SharedData::setCurrentImage(const cv::Mat &image)
 {
     boost::mutex::scoped_lock lock(mutex_cimage);
