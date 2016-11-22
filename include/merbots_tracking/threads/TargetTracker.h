@@ -17,7 +17,7 @@ public:
     void run();
 
     void reset();
-    void setTarget(const cv::Mat& image);
+    void setTarget();
 
 private:
     ros::NodeHandle nh;

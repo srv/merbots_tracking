@@ -9,7 +9,7 @@ TargetDetector::TargetDetector(const ros::NodeHandle& nodeh, Params* params, Sha
     // Copying the current target
     if (sdata->existsTarget())
     {
-        setTarget(sdata->getTarget());
+        setTarget();
     }
 }
 
@@ -22,8 +22,10 @@ void TargetDetector::run()
     ros::Rate r(500);
     while (ros::ok())
     {
+        sdata->mutex_upd_target.lock();
         if (sdata->getStatus() == DETECTION && sdata->existsImage() && sdata->existsTarget())
         {
+
             // Computes the detection
             cv::Mat image = sdata->getCurrentImage();
 
@@ -120,6 +122,7 @@ void TargetDetector::run()
                 }
             }
         }
+        sdata->mutex_upd_target.unlock();
 
         // Sleeping the needed time
         ros::spinOnce();
@@ -127,10 +130,10 @@ void TargetDetector::run()
     }
 }
 
-void TargetDetector::setTarget(const cv::Mat& image)
+void TargetDetector::setTarget()
 {
     // Copying the current target
-    image.copyTo(curr_target);
+    sdata->copyCurrentTarget(curr_target);
 
     ROS_INFO("New target received");
 
@@ -138,7 +141,6 @@ void TargetDetector::setTarget(const cv::Mat& image)
     obj_kps.clear();
     p->det_detector->detect(curr_target, obj_kps);
     ROS_INFO("Target: %i keypoints found", (int) obj_kps.size());
-    obj_descs.release();
     p->det_descriptor->compute(curr_target, obj_kps, obj_descs);
     ROS_INFO("Target: %i descriptors found", (int) obj_descs.rows);
 
@@ -166,6 +168,8 @@ void TargetDetector::setTarget(const cv::Mat& image)
     obj_corners.push_back(cv::Point(curr_target.cols, 0));
     obj_corners.push_back(cv::Point(curr_target.cols, curr_target.rows));
     obj_corners.push_back(cv::Point(0, curr_target.rows));
+
+    ROS_INFO("Target correctly received in the detector thread");
 
     // cv::imshow("Target", curr_target);
     // cv::waitKey(0);

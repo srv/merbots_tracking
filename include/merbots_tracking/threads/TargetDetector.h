@@ -1,6 +1,7 @@
 #ifndef _TARGET_DETECTOR_H
 #define _TARGET_DETECTOR_H
 
+#include <opencv2/highgui.hpp>
 #include <opencv2/calib3d.hpp>
 
 #include <merbots_tracking/util/Params.h>
@@ -14,7 +15,7 @@ public:
 
     void run();
 
-    void setTarget(const cv::Mat& image);
+    void setTarget();
 
 private:
 

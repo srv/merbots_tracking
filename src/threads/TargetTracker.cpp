@@ -35,8 +35,9 @@ void TargetTracker::run()
     ros::Rate r(500);
     while (ros::ok())
     {
+        sdata->mutex_upd_target.lock();
         if (sdata->getStatus() == TRACKING && sdata->existsImage() && sdata->existsTarget())
-        {            
+        {
             // Perform the tracking
             cv::Mat image = sdata->getCurrentImage();
 
@@ -82,6 +83,7 @@ void TargetTracker::run()
                 sdata->setROI(curr_roi);
             }
         }
+        sdata->mutex_upd_target.unlock();
 
         // Sleeping the needed time
         ros::spinOnce();
@@ -94,7 +96,8 @@ void TargetTracker::reset()
     first_image = true; // WARNING Mutex?
 }
 
-void TargetTracker::setTarget(const cv::Mat& image)
+void TargetTracker::setTarget()
 {
-    phog.describe(image, target_descr);
+    phog.describe(sdata->getTarget(), target_descr);
+    ROS_INFO("Target correctly received in the tracker thread");
 }

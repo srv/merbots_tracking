@@ -29,6 +29,8 @@ public:
     void copyCurrentImage(cv::Mat& image);
     bool existsImage();
 
+    boost::mutex mutex_upd_target;
+
 protected:
     // Protected constructor. Singleton class.
     SharedData() :
