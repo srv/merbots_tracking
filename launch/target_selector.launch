@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+    <!-- Arguments -->
+    <arg name="img_topic" default="/cv_camera/image_raw" />
+    <arg name="set_target" default="/det_and_track/set_target" />
+
+    <!-- Target Selector -->
+    <node pkg="merbots_tracking" type="target_selector" name="target_selector" output="screen">
+        <remap from="~image" to="$(arg img_topic)" />
+        <remap from="~set_target" to="$(arg set_target)" />
+    </node>
+
+</launch>

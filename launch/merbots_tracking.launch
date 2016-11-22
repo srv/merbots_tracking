@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+    <!-- Arguments -->
+    <arg name="img_topic" default="/cv_camera/image_raw" />
+    <arg name="set_target" default="/det_and_track/target" />
+    <arg name="detector" default="SIFT" />
+    <arg name="descriptor" default="SIFT" />
+    <arg name="debug" default="true" />
+    <arg name="rep_error" default="3.0" />
+    <arg name="inliers" default="25" />
+    <arg name="resize" default="0.5" />
+    <arg name="target_from_file" default="" />
+    <arg name="det_timer" default="5.0" />
+    <arg name="use_camera" default="false" />
+    <arg name="detect_only" default="false" />
+    <arg name="tracker" default="struck" />
+    <arg name="track_thresh" default="0.5" />
+
+    <!-- cv_camera -->
+    <node pkg="cv_camera" type="cv_camera_node" name="cv_camera" output="screen" />
+
+    <!-- Detection and Tracking -->
+    <node pkg="merbots_tracking" type="det_and_track" name="det_and_track" output="screen">
+        <param name="detector" value="$(arg detector)" />
+        <param name="descriptor" value="$(arg descriptor)" />
+        <param name="debug" value="$(arg debug)" />
+        <param name="rep_error" value="$(arg rep_error)" />
+        <param name="inliers" value="$(arg inliers)" />
+        <param name="resize" value="$(arg resize)" />
+        <param name="target_from_file" value="$(arg target_from_file)" />
+        <param name="det_timer" value="$(arg det_timer)" />
+        <param name="use_camera" value="$(arg use_camera)" />
+        <param name="detect_only" value="$(arg detect_only)" />
+        <param name="tracker" value="$(arg tracker)" />
+        <param name="track_thresh" value="$(arg track_thresh)" />
+
+        <remap from="~image" to="$(arg img_topic)" />
+    </node>
+
+    <!-- Target Selector -->
+    <node pkg="merbots_tracking" type="target_selector" name="target_selector" output="screen">
+        <remap from="~image" to="$(arg img_topic)" />
+        <remap from="~target" to="$(arg set_target)" />
+    </node>
+
+</launch>
