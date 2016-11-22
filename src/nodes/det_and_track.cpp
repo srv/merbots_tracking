@@ -29,48 +29,45 @@ void processImage(const cv::Mat& image)
     cv::Mat timg;
     cv::resize(image, timg, cv::Size(), params->det_resize, params->det_resize);
 
-    //sdata->setCurrentImage(image);
     sdata->setCurrentImage(timg);
 }
 
-// SetTarget service callback
-bool setTarget(merbots_tracking::SetTarget::Request &req, merbots_tracking::SetTarget::Response &res)
+// Target callback
+void target_cb(const sensor_msgs::ImageConstPtr& msg)
 {
     // Converting the image message to OpenCV format
     cv_bridge::CvImageConstPtr cv_ptr;
     try
     {
-        sensor_msgs::Image img = static_cast<sensor_msgs::Image>(req.image);
-        sensor_msgs::ImageConstPtr img_ptr(&img);
-        cv_ptr = cv_bridge::toCvShare(img_ptr, img_ptr->encoding);
+        cv_ptr = cv_bridge::toCvShare(msg, msg->encoding);
     }
     catch (cv_bridge::Exception& e)
     {
         ROS_ERROR("Error converting image to OpenCV format: %s", e.what());
-        return false;
+        return;
     }
 
     // Update the state
+    sdata->mutex_upd_target.lock();
     sdata->setTarget(cv_ptr->image);
-    tdet->setTarget(cv_ptr->image);
-    ttrack->setTarget(cv_ptr->image);
+    tdet->setTarget();
+    ttrack->setTarget();
     if (sdata->getStatus() == TRACKING)
     {
         sdata->setStatus(DETECTION);
         ttrack->reset();
     }
+    sdata->mutex_upd_target.unlock();
 
     // Cleaning the current roi
     cv::Rect roi;
     roi.width = 0;
     roi.height = 0;
     sdata->setROI(roi);
-
-    return true;
 }
 
 // Image ROS topic callback
-void image_cb(const sensor_msgs::ImageConstPtr &msg)
+void image_cb(const sensor_msgs::ImageConstPtr& msg)
 {
     // Converting the image message to OpenCV format
     cv_bridge::CvImageConstPtr cv_ptr;
@@ -88,7 +85,7 @@ void image_cb(const sensor_msgs::ImageConstPtr &msg)
 }
 
 // Detection phase timer
-void timerDet_cb(const ros::TimerEvent &event)
+void timer_cb(const ros::TimerEvent &event)
 {
     // Update the state
     if (sdata->getStatus() == TRACKING)
@@ -174,11 +171,12 @@ int main(int argc, char** argv)
         ROS_INFO("Target loaded from: %s", params->det_target_from_file.c_str());
     }
 
-    // SetTarget service
-    ros::ServiceServer serv_settgt = nh.advertiseService("setTarget", setTarget);
+    // Topic for setting the target
+    image_transport::ImageTransport it(nh);
+    image_transport::Subscriber target = it.subscribe("target", 0, &target_cb);
 
     // Region of Interest publisher
-    roi_pub = nh.advertise<sensor_msgs::RegionOfInterest>("target", 1);
+    roi_pub = nh.advertise<sensor_msgs::RegionOfInterest>("roi", 1);
 
     // Window to show the results
     if (params->debug)
@@ -195,7 +193,7 @@ int main(int argc, char** argv)
     ttrack = new TargetTracker(nh, params, sdata);
     boost::thread ttrack_thread(&TargetTracker::run, ttrack);
 
-    ros::Timer timer_det = nh.createTimer(ros::Duration(params->det_timer), &timerDet_cb);
+    ros::Timer timer_det = nh.createTimer(ros::Duration(params->det_timer), &timer_cb);
 
     // Processing images
     if (params->use_camera)
@@ -223,8 +221,7 @@ int main(int argc, char** argv)
         // Use a ROS topic to receive images
 
         // Publishers and Subscribers
-        image_transport::ImageTransport it(nh);
-        image_transport::Subscriber img_sub = it.subscribe("image", 0, image_cb);
+        image_transport::Subscriber img_sub = it.subscribe("image", 0, &image_cb);
 
         // Spinning the ROS execution
         while (ros::ok())
