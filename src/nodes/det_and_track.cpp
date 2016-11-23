@@ -7,7 +7,6 @@
 #include <ros/ros.h>
 #include <sensor_msgs/RegionOfInterest.h>
 
-#include <merbots_tracking/SetTarget.h>
 #include <merbots_tracking/threads/TargetDetector.h>
 #include <merbots_tracking/threads/TargetTracker.h>
 #include <merbots_tracking/util/Params.h>
