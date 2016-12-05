@@ -72,6 +72,7 @@ void Params::readParams(const ros::NodeHandle& nh)
     // Resizing in target detection
     nh.param("resize", det_resize, 1.0);
     ROS_INFO("[Params] Resize in target detection: %f", det_resize);
+    det_resize_inv = 1.0 / det_resize;
 
     // Load target from file?
     nh.param<std::string>("target_from_file", det_target_from_file, "");

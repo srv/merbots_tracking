@@ -23,6 +23,7 @@ public:
     double det_rerror;
     int det_inliers;
     double det_resize;
+    double det_resize_inv;
     std::string det_target_from_file;
     double det_timer;
     bool use_camera;
@@ -43,6 +44,7 @@ protected:
         det_rerror(3.0),
         det_inliers(25),
         det_resize(1.0),
+        det_resize_inv(1.0),
         det_target_from_file(""),
         det_timer(5.0),
         use_camera(true),
