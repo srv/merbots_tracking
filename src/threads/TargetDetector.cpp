@@ -56,7 +56,7 @@ void TargetDetector::run()
             bool thereis_object = false;
             cv::Mat homography;
             cv::Mat ninliers;
-            if (mpts_obj.size() > 7)
+            if (mpts_img.size() > 7)
             {
                 homography = cv::findHomography(mpts_obj, mpts_img, cv::RANSAC, p->det_rerror, ninliers);
 
@@ -97,9 +97,9 @@ void TargetDetector::run()
 
                 // Determining the bounding box
                 int xmin = std::max(0, *std::min_element(xlist.begin(), xlist.end()));
-                int xmax = std::min(image.rows, *std::max_element(xlist.begin(), xlist.end()));
+                int xmax = std::min(image.cols, *std::max_element(xlist.begin(), xlist.end()));
                 int ymin = std::max(0, *std::min_element(ylist.begin(), ylist.end()));
-                int ymax = std::min(image.cols, *std::max_element(ylist.begin(), ylist.end()));
+                int ymax = std::min(image.rows, *std::max_element(ylist.begin(), ylist.end()));
 
                 // Setting the current ROI
                 sdata->setROI(xmin, ymin, xmax - xmin, ymax - ymin);
