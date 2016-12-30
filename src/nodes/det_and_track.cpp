@@ -107,8 +107,8 @@ void publishData()
     bool existROI = roi.width > 0 && roi.height > 0;
 
     // Publishing ROI
-    if (existROI)
-    {
+    //if (existROI)
+    //{
         sensor_msgs::RegionOfInterest roi_msg;
         roi_msg.x_offset = static_cast<unsigned>(roi.x * params->det_resize_inv);
         roi_msg.y_offset = static_cast<unsigned>(roi.y * params->det_resize_inv);
@@ -116,7 +116,7 @@ void publishData()
         roi_msg.height = static_cast<unsigned>(roi.height * params->det_resize_inv);
         roi_msg.do_rectify = 1;
         roi_pub.publish(roi_msg);
-    }
+    //}
 
     // Publishing the image if needed
     if (params->debug && sdata->existsImage())
