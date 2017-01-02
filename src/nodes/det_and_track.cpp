@@ -38,7 +38,7 @@ void target_cb(const sensor_msgs::ImageConstPtr& msg)
     cv_bridge::CvImageConstPtr cv_ptr;
     try
     {
-        cv_ptr = cv_bridge::toCvShare(msg, msg->encoding);
+        cv_ptr = cv_bridge::toCvShare(msg, "bgr8");
     }
     catch (cv_bridge::Exception& e)
     {
@@ -72,7 +72,7 @@ void image_cb(const sensor_msgs::ImageConstPtr& msg)
     cv_bridge::CvImageConstPtr cv_ptr;
     try
     {
-        cv_ptr = cv_bridge::toCvShare(msg, msg->encoding);
+        cv_ptr = cv_bridge::toCvShare(msg, "bgr8");
     }
     catch (cv_bridge::Exception& e)
     {
