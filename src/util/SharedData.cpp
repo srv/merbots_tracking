@@ -36,6 +36,20 @@ cv::Rect SharedData::getROI()
     return roi;
 }
 
+void SharedData::setScenePoints(const std::vector<cv::Point2f>& pts)
+{
+    boost::mutex::scoped_lock lock(mutex_points);
+    points.clear();
+    points = pts;
+}
+
+void SharedData::getScenePoints(std::vector<cv::Point2f>& pts)
+{
+    boost::mutex::scoped_lock lock(mutex_points);
+    pts.clear();
+    pts = points;
+}
+
 void SharedData::setStatus(const Status& curr_status)
 {
     boost::mutex::scoped_lock lock(mutex_status);
@@ -52,12 +66,63 @@ void SharedData::setTarget(const cv::Mat &image)
 {
     boost::mutex::scoped_lock lock(mutex_target);
     image.copyTo(target);
+
+    ROS_INFO("New target received");
+
+    // Detecting and describing keypoints
+    target_kps.clear();
+    p->det_detector->detect(target, target_kps);
+    ROS_INFO("Target: %i keypoints found", (int) target_kps.size());
+    p->det_descriptor->compute(target, target_kps, target_descs);
+    ROS_INFO("Target: %i descriptors found", (int) target_descs.rows);
+
+    if (target_ind)
+    {
+        delete target_ind;
+    }
+
+    if (target_descs.type() == CV_8U)
+    {
+        // Binary descriptors detected (from ORB or BRIEF)
+
+        // Create Flann LSH index
+        target_ind = new cv::flann::Index(target_descs, cv::flann::LshIndexParams(12, 20, 2), cvflann::FLANN_DIST_HAMMING);
+    } else
+    {
+        // assume it is CV_32F
+        // Create a Flann KDTree index
+        target_ind = new cv::flann::Index(target_descs, cv::flann::KDTreeIndexParams(), cvflann::FLANN_DIST_EUCLIDEAN);
+    }
+
+    // Storing the corners of the target
+    target_pts.clear();
+    target_pts.push_back(cv::Point(0, 0));
+    target_pts.push_back(cv::Point(target.cols, 0));
+    target_pts.push_back(cv::Point(0, target.rows));
+    target_pts.push_back(cv::Point(target.cols, target.rows));
+
+    ROS_INFO("Target correctly received in the detector thread");
+
+    // cv::imshow("Target", curr_target);
+    // cv::waitKey(0);
 }
 
 cv::Mat SharedData::getTarget()
 {
     boost::mutex::scoped_lock lock(mutex_target);
     return target;
+}
+
+void SharedData::searchKeypoints(const cv::Mat& descs, cv::Mat& results, cv::Mat& dists, int knn)
+{
+    boost::mutex::scoped_lock lock(mutex_target);
+    target_ind->knnSearch(descs, results, dists, knn);
+}
+
+cv::Point2f SharedData::getKeypoint(int index)
+{
+    boost::mutex::scoped_lock lock(mutex_target);
+    return target_kps[index].pt;
 }
 
 void SharedData::copyCurrentTarget(cv::Mat& image)
@@ -70,6 +135,13 @@ bool SharedData::existsTarget()
 {
     boost::mutex::scoped_lock lock(mutex_target);
     return !target.empty();
+}
+
+void SharedData::getTargetPoints(std::vector<cv::Point2f>& pts)
+{
+    boost::mutex::scoped_lock lock(mutex_target);
+    pts.clear();
+    pts = target_pts;
 }
 
 void SharedData::setCurrentImage(const cv::Mat &image)

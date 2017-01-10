@@ -5,10 +5,10 @@
 #include <opencv2/features2d.hpp>
 #include <opencv2/xfeatures2d.hpp>
 #include <ros/ros.h>
-#include <sensor_msgs/RegionOfInterest.h>
 
 #include <merbots_tracking/threads/TargetDetector.h>
 #include <merbots_tracking/threads/TargetTracker.h>
+#include <merbots_tracking/TargetPoints.h>
 #include <merbots_tracking/util/Params.h>
 #include <merbots_tracking/util/SharedData.h>
 
@@ -49,7 +49,7 @@ void target_cb(const sensor_msgs::ImageConstPtr& msg)
     // Update the state
     sdata->mutex_upd_target.lock();
     sdata->setTarget(cv_ptr->image);
-    tdet->setTarget();
+    //tdet->setTarget();
     ttrack->setTarget();
     if (sdata->getStatus() == TRACKING)
     {
@@ -105,18 +105,24 @@ void publishData()
     // Publishing the current ROI
     cv::Rect roi = sdata->getROI();
     bool existROI = roi.width > 0 && roi.height > 0;
+		
+	merbots_tracking::TargetPoints roi_msg;
+	std::vector<cv::Point2f> pts;
 
     // Publishing ROI
-    //if (existROI)
-    //{
-        sensor_msgs::RegionOfInterest roi_msg;
-        roi_msg.x_offset = static_cast<unsigned>(roi.x * params->det_resize_inv);
-        roi_msg.y_offset = static_cast<unsigned>(roi.y * params->det_resize_inv);
-        roi_msg.width = static_cast<unsigned>(roi.width * params->det_resize_inv);
-        roi_msg.height = static_cast<unsigned>(roi.height * params->det_resize_inv);
-        roi_msg.do_rectify = 1;
-        roi_pub.publish(roi_msg);
-    //}
+	if (existROI)
+	{
+		sdata->getScenePoints(pts);
+		
+		roi_msg.point_tl.x = pts[0].x * params->det_resize_inv;
+		roi_msg.point_tl.y = pts[0].y * params->det_resize_inv;
+    	roi_msg.point_tr.x = pts[1].x * params->det_resize_inv;
+    	roi_msg.point_tr.y = pts[1].y * params->det_resize_inv;
+   		roi_msg.point_bl.x = pts[2].x * params->det_resize_inv;
+    	roi_msg.point_bl.y = pts[2].y * params->det_resize_inv;
+	}
+    roi_msg.exists_roi = (unsigned char) (existROI ? 1 : 0);
+    roi_pub.publish(roi_msg);
 
     // Publishing the image if needed
     if (params->debug && sdata->existsImage())
@@ -136,7 +142,11 @@ void publishData()
 
         if (existROI)
         {
-            cv::rectangle(img, roi, cv::Scalar(0,0, 255), 2);
+//            cv::rectangle(img, roi, cv::Scalar(0,0, 255), 2);
+
+            cv::circle(img, cv::Point((int)pts[0].x, (int)pts[0].y), 3, cv::Scalar(0, 255, 0), -1);
+            cv::circle(img, cv::Point((int)pts[1].x, (int)pts[1].y), 3, cv::Scalar(0, 255, 0), -1);
+            cv::circle(img, cv::Point((int)pts[2].x, (int)pts[2].y), 3, cv::Scalar(0, 255, 0), -1);
         }
         cv::imshow("Detection and Tracking", img);
         cv::waitKey(5);
@@ -175,7 +185,7 @@ int main(int argc, char** argv)
     image_transport::Subscriber target = it.subscribe("target", 0, &target_cb);
 
     // Region of Interest publisher
-    roi_pub = nh.advertise<sensor_msgs::RegionOfInterest>("roi", 1);
+    roi_pub = nh.advertise<merbots_tracking::TargetPoints>("roi", 1);
 
     // Window to show the results
     if (params->debug)
