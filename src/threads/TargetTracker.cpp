@@ -72,7 +72,7 @@ void TargetTracker::run()
                 {
                     // We compute the position of the corners of the target
                     int mid_w = static_cast<int>(curr_roi.width / 2.0);
-                    int mid_h = static_cast<int>(curr_roi.height / 2.0);
+                    int mid_h = static_cast<int>(curr_roi.height / 2.0);					
 
                     // Augmenting the current ROI
                     curr_roi.x = curr_roi.x - mid_w < 0 ?
@@ -88,7 +88,7 @@ void TargetTracker::run()
                     std::vector<cv::KeyPoint> img_kps;
                     p->det_detector->detect(image(curr_roi), img_kps);
                     cv::Mat img_descs;
-                    p->det_descriptor->compute(image(curr_roi), img_kps, img_descs);
+                    p->det_descriptor->compute(image(curr_roi), img_kps, img_descs);                    
 
                     // Matching descriptors of the current scene against the target
                     cv::Mat results;
@@ -102,7 +102,10 @@ void TargetTracker::run()
                         if (results.at<int>(i, 0) >= 0 && results.at<int>(i, 1) >= 0
                             && dists.at<float>(i, 0) < 0.8 * dists.at<float>(i, 1))
                         {
-                            mpts_img.push_back(img_kps[i].pt);
+                            cv::Point2f p = img_kps[i].pt;
+                            p.x += curr_roi.x;
+                            p.y += curr_roi.y;
+                            mpts_img.push_back(p);
                             mpts_obj.push_back(sdata->getKeypoint(results.at<int>(i, 0)));
                         }
                     }
