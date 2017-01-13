@@ -15,8 +15,6 @@ public:
 
     void run();
 
-    void setTarget();
-
 private:
 
     ros::NodeHandle nh;
@@ -26,13 +24,6 @@ private:
 
     // Shared Data
     SharedData* sdata;
-
-    // Internal parameters
-    cv::Mat curr_target;
-    std::vector<cv::KeyPoint> obj_kps;
-    cv::Mat obj_descs;
-    cv::flann::Index* obj_ind;
-    std::vector<cv::Point2f> obj_corners;
 };
 
 #endif // _TARGET_DETECTOR_H

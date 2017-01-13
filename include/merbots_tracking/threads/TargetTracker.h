@@ -1,6 +1,9 @@
 #ifndef _TARGET_TRACKER_H
 #define _TARGET_TRACKER_H
 
+#include <opencv2/highgui.hpp>
+#include <opencv2/calib3d.hpp>
+
 #include <merbots_tracking/util/Params.h>
 #include <merbots_tracking/util/PHOG.h>
 #include <merbots_tracking/util/SharedData.h>

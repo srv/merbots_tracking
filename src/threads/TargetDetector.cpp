@@ -3,14 +3,8 @@
 TargetDetector::TargetDetector(const ros::NodeHandle& nodeh, Params* params, SharedData* shdata) :
     nh(nodeh),
     p(params),
-    sdata(shdata),
-    obj_ind(0)
+    sdata(shdata)
 {
-    // Copying the current target
-    if (sdata->existsTarget())
-    {
-        setTarget();
-    }
 }
 
 TargetDetector::~TargetDetector()
@@ -25,7 +19,6 @@ void TargetDetector::run()
         sdata->mutex_upd_target.lock();
         if (sdata->getStatus() == DETECTION && sdata->existsImage() && sdata->existsTarget())
         {
-
             // Computes the detection
             cv::Mat image = sdata->getCurrentImage();
 
@@ -38,7 +31,7 @@ void TargetDetector::run()
             // Matching descriptors of the current scene against the target
             cv::Mat results;
             cv::Mat dists;
-            obj_ind->knnSearch(img_descs, results, dists, 2);
+            sdata->searchKeypoints(img_descs, results, dists, 2);
 
             // Filtering matchings using the NNDR
             std::vector<cv::Point2f> mpts_obj, mpts_img;
@@ -48,7 +41,7 @@ void TargetDetector::run()
                     && dists.at<float>(i, 0) < 0.8 * dists.at<float>(i, 1))
                 {
                     mpts_img.push_back(img_kps[i].pt);
-                    mpts_obj.push_back(obj_kps[results.at<int>(i, 0)].pt);
+                    mpts_obj.push_back(sdata->getKeypoint(results.at<int>(i, 0)));
                 }
             }
 
@@ -82,8 +75,13 @@ void TargetDetector::run()
             if (thereis_object)
             {
                 // Transforming points
+                std::vector<cv::Point2f> obj_corners(4);
+                sdata->getTargetPoints(obj_corners);
                 std::vector<cv::Point2f> scene_corners(4);
                 cv::perspectiveTransform(obj_corners, scene_corners, homography);
+
+                // Storing the transformed points
+                sdata->setScenePoints(scene_corners);
 
                 std::vector<int> xlist, ylist;
                 xlist.push_back(static_cast<int>(scene_corners[0].x));
@@ -128,49 +126,4 @@ void TargetDetector::run()
         ros::spinOnce();
         r.sleep();
     }
-}
-
-void TargetDetector::setTarget()
-{
-    // Copying the current target
-    sdata->copyCurrentTarget(curr_target);
-
-    ROS_INFO("New target received");
-
-    // Detecting and describing keypoints
-    obj_kps.clear();
-    p->det_detector->detect(curr_target, obj_kps);
-    ROS_INFO("Target: %i keypoints found", (int) obj_kps.size());
-    p->det_descriptor->compute(curr_target, obj_kps, obj_descs);
-    ROS_INFO("Target: %i descriptors found", (int) obj_descs.rows);
-
-    if (obj_ind)
-    {
-        delete obj_ind;
-    }
-
-    if (obj_descs.type() == CV_8U)
-    {
-        // Binary descriptors detected (from ORB or BRIEF)
-
-        // Create Flann LSH index
-        obj_ind = new cv::flann::Index(obj_descs, cv::flann::LshIndexParams(12, 20, 2), cvflann::FLANN_DIST_HAMMING);
-    } else
-    {
-        // assume it is CV_32F
-        // Create a Flann KDTree index
-        obj_ind = new cv::flann::Index(obj_descs, cv::flann::KDTreeIndexParams(), cvflann::FLANN_DIST_EUCLIDEAN);
-    }
-
-    // Storing the corners of the target
-    obj_corners.clear();
-    obj_corners.push_back(cv::Point(0, 0));
-    obj_corners.push_back(cv::Point(curr_target.cols, 0));
-    obj_corners.push_back(cv::Point(curr_target.cols, curr_target.rows));
-    obj_corners.push_back(cv::Point(0, curr_target.rows));
-
-    ROS_INFO("Target correctly received in the detector thread");
-
-    // cv::imshow("Target", curr_target);
-    // cv::waitKey(0);
 }
