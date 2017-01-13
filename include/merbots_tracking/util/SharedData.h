@@ -35,6 +35,8 @@ public:
     cv::Mat getCurrentImage();
     void copyCurrentImage(cv::Mat& image);
     bool existsImage();
+    void setInliers(const int& inliers);
+    int getInliers();
 
     boost::mutex mutex_upd_target;
 
@@ -42,7 +44,8 @@ protected:
     // Protected constructor. Singleton class.
     SharedData() :
         status(DETECTION),
-        target_ind(0)
+        target_ind(0),
+        last_inliers(0)
     {
         p = Params::getInstance();
     }
@@ -74,6 +77,9 @@ protected:
 
     boost::mutex mutex_cimage;
     cv::Mat curr_image;
+
+    boost::mutex mutex_inliers;
+    int last_inliers;
 
     // Parameters
     Params* p;

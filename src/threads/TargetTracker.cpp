@@ -134,6 +134,9 @@ void TargetTracker::run()
                         {
                             thereis_object = true;
                         }
+
+                        // Setting the current number of inliers
+                        sdata->setInliers(total_inliers);
                     }
 
                     // If the object is present in the image

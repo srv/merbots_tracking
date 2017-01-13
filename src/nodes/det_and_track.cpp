@@ -11,6 +11,7 @@
 #include <merbots_tracking/TargetPoints.h>
 #include <merbots_tracking/util/Params.h>
 #include <merbots_tracking/util/SharedData.h>
+#include <std_msgs/Int32.h>
 
 // Global parameters
 Params* params;
@@ -22,6 +23,7 @@ TargetTracker* ttrack;
 
 // Public publishers and subscribers
 ros::Publisher roi_pub;
+ros::Publisher inliers_pub;
 
 void processImage(const cv::Mat& image)
 {
@@ -121,8 +123,16 @@ void publishData()
    		roi_msg.point_bl.x = pts[2].x * params->det_resize_inv;
     	roi_msg.point_bl.y = pts[2].y * params->det_resize_inv;
 	}
+
+    // Publishing ROI
     roi_msg.exists_roi = (unsigned char) (existROI ? 1 : 0);
     roi_pub.publish(roi_msg);
+
+    // Publishing Inliers
+    int inliers = sdata->getInliers();
+    std_msgs::Int32 inliers_msg;
+    inliers_msg.data = inliers;
+    inliers_pub.publish(inliers_msg);
 
     // Publishing the image if needed
     if (params->debug && sdata->existsImage())
@@ -179,6 +189,9 @@ int main(int argc, char** argv)
 
     // Region of Interest publisher
     roi_pub = nh.advertise<merbots_tracking::TargetPoints>("roi", 1);
+
+    // Inliners publisher
+    inliers_pub = nh.advertise<std_msgs::Int32>("inliers", 1);
 
     // Window to show the results
     if (params->debug)

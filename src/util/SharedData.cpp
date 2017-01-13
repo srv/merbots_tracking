@@ -167,3 +167,15 @@ bool SharedData::existsImage()
     boost::mutex::scoped_lock lock(mutex_cimage);
     return !curr_image.empty();
 }
+
+void SharedData::setInliers(const int& inliers)
+{
+    boost::mutex::scoped_lock lock(mutex_inliers);
+    last_inliers = inliers;
+}
+
+int SharedData::getInliers()
+{
+    boost::mutex::scoped_lock lock(mutex_inliers);
+    return last_inliers;
+}
