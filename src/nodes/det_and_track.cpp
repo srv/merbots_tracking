@@ -173,13 +173,6 @@ int main(int argc, char** argv)
     sdata = SharedData::getInstance();
     ROS_INFO("Shared data initialized");
 
-    if (params->det_target_from_file != "")
-    {
-        cv::Mat image = cv::imread(params->det_target_from_file);
-        sdata->setTarget(image);
-        ROS_INFO("Target loaded from: %s", params->det_target_from_file.c_str());
-    }
-
     // Topic for setting the target
     image_transport::ImageTransport it(nh);
     image_transport::Subscriber target = it.subscribe("target", 0, &target_cb);
@@ -201,6 +194,20 @@ int main(int argc, char** argv)
     // Target Tracker Thread
     ttrack = new TargetTracker(nh, params, sdata);
     boost::thread ttrack_thread(&TargetTracker::run, ttrack);
+
+    if (params->det_target_from_file != "")
+    {
+        cv::Mat image = cv::imread(params->det_target_from_file);
+
+        sdata->mutex_upd_target.lock();
+        sdata->setTarget(image);
+        //tdet->setTarget();
+        ttrack->setTarget();
+
+        sdata->mutex_upd_target.unlock();
+
+        ROS_INFO("Target loaded from: %s", params->det_target_from_file.c_str());
+    }
 
     ros::Timer timer_det = nh.createTimer(ros::Duration(params->det_timer), &timer_cb);
 
