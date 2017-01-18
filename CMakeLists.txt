@@ -68,7 +68,7 @@ add_executable(target_selector
 target_link_libraries(target_selector ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 # Detection and Tracking
-add_executable(det_and_track
+add_library(det_and_track
     src/util/Params.cpp
     src/util/PHOG.cpp
     src/util/SharedData.cpp
@@ -77,6 +77,12 @@ add_executable(det_and_track
     include/merbots_tracking/wrappers/VisualTracker.h
     src/wrappers/StruckVisualTracker.cpp
     src/wrappers/KCFVisualTracker.cpp
-    src/nodes/det_and_track.cpp
+    src/object_detector/ObjectDetector.cpp
 )
 target_link_libraries(det_and_track ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} struck kcf)
+
+# Detection and Tracking Node
+add_executable(det_and_track_node
+    src/nodes/det_and_track.cpp
+)
+target_link_libraries(det_and_track_node det_and_track)
