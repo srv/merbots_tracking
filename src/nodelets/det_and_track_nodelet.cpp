@@ -12,7 +12,7 @@ PLUGINLIB_DECLARE_CLASS(
     void ObjectDetectorNodelet::onInit()
     {
       NODELET_INFO("Initializing Object Detector Nodelet");
-      ros::NodeHandle nh = getPrivateNodeHandle();
+      ros::NodeHandle nh = getMTPrivateNodeHandle();
       objdet_ = new ObjectDetector(nh);
       objdet_->start();
     }
