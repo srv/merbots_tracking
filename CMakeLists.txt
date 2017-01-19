@@ -8,7 +8,7 @@ file(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR} *.cxx *.cpp *.c *.py)
 file(GLOB_RECURSE LNCH ${CMAKE_CURRENT_SOURCE_DIR} *.launch)
 
 # Catkin dependencies
-find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs std_msgs geometry_msgs image_transport cv_bridge camera_calibration_parsers message_generation)
+find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs std_msgs geometry_msgs image_transport cv_bridge camera_calibration_parsers message_generation nodelet)
 
 # System dependencies
 find_package(OpenCV REQUIRED)
@@ -37,7 +37,7 @@ generate_messages(
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES struck kcf
-    CATKIN_DEPENDS roscpp sensor_msgs std_msgs geometry_msgs image_transport cv_bridge camera_calibration_parsers message_runtime
+    CATKIN_DEPENDS roscpp sensor_msgs std_msgs geometry_msgs image_transport cv_bridge camera_calibration_parsers message_runtime nodelet
 	DEPENDS OpenCV
 )
 
@@ -80,6 +80,10 @@ add_library(det_and_track
     src/object_detector/ObjectDetector.cpp
 )
 target_link_libraries(det_and_track ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} struck kcf)
+
+# Detection and Tracking Nodelet
+add_library(objdet_nodelet src/nodelets/det_and_track_nodelet.cpp)
+target_link_libraries(objdet_nodelet det_and_track)
 
 # Detection and Tracking Node
 add_executable(det_and_track_node

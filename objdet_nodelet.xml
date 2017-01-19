@@ -1,0 +1,7 @@
+<library path="lib/libobjdet_nodelet">
+  <class name="merbots_tracking/ObjectDetectorNodelet" type="merbots_tracking::ObjectDetectorNodelet" base_class_type="nodelet::Nodelet">
+    <description>
+      Detection and Tracking Nodelet
+    </description>
+  </class>
+</library>
