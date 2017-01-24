@@ -34,6 +34,7 @@ namespace merbots_tracking
     if (params->debug)
     {
       cv::namedWindow("Detection and Tracking");
+      cv::namedWindow("Current Target");
     }
 
     // Threads
@@ -216,10 +217,11 @@ namespace merbots_tracking
     inliers_pub.publish(inliers_msg);
 
     // Publishing the image if needed
-    if (params->debug && sdata->existsImage())
+    if (params->debug && sdata->existsImage() && sdata->existsTarget())
     {
-      cv::Mat img;
+      cv::Mat img, tgt;
       sdata->copyCurrentImage(img);
+      sdata->copyCurrentTarget(tgt);
 
       // Plotting the working mode in the image
       if (sdata->getStatus() == DETECTION)
@@ -239,7 +241,9 @@ namespace merbots_tracking
         cv::circle(img, cv::Point((int)pts[1].x, (int)pts[1].y), 3, cv::Scalar(0, 255, 0), -1);
         cv::circle(img, cv::Point((int)pts[2].x, (int)pts[2].y), 3, cv::Scalar(0, 255, 0), -1);
       }
+
       cv::imshow("Detection and Tracking", img);
+      cv::imshow("Current Target", tgt);
       cv::waitKey(5);
     }
   }

@@ -25,7 +25,6 @@ public:
         target_pub = it.advertise("target", 0);
 
         cv::namedWindow("Target Selector");
-        cv::namedWindow("Current Target");
         cv::setMouseCallback("Target Selector", &TargetSelector::staticMouse_cb, this);
 
         timer_repaint = nh.createTimer(ros::Duration(0.05), &TargetSelector::timerRepaint_cb, this);
@@ -138,13 +137,6 @@ private:
         }
         cv::imshow("Target Selector", img);
         cv::waitKey(5);
-
-        // Repainting the current target window
-        if (curr_roi.x != 0 || curr_roi.y != 0)
-        {
-            cv::imshow("Current Target", curr_target(curr_roi));
-            cv::waitKey(5);
-        }
     }
 
     // Variables
