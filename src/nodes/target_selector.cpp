@@ -12,7 +12,8 @@ public:
     {
         DISPLAY,
         WAIT_IMAGE,
-        SELECT
+        SELECT_IN,
+        SELECT_OUT
     };
 
     TargetSelector() :
@@ -59,7 +60,7 @@ private:
         if (curr_mode == WAIT_IMAGE)
         {
             cv_ptr->image.copyTo(curr_target);
-            curr_mode = SELECT;
+            curr_mode = SELECT_IN;
         }
     }
 
@@ -84,11 +85,18 @@ private:
             {
                 ROS_INFO("Selecting the target ...");
                 curr_mode = WAIT_IMAGE;
-                initpos.x = x;
-                initpos.y = y;
             }
         }
-        else if (curr_mode == SELECT)
+        else if (curr_mode == SELECT_IN)
+        {
+            if (event == CV_EVENT_LBUTTONDOWN)
+            {
+                initpos.x = x;
+                initpos.y = y;
+                curr_mode = SELECT_OUT;
+            }
+        }
+        else if (curr_mode == SELECT_OUT)
         {
             if (event == CV_EVENT_LBUTTONDOWN)
             {
@@ -130,10 +138,13 @@ private:
         {
             curr_image.copyTo(img);
         }
-        else if (curr_mode == SELECT)
+        else
         {
             curr_target.copyTo(img);
-            cv::rectangle(img, initpos, curr_mousepos, cv::Scalar(0, 255, 0), 3);
+            if (curr_mode == SELECT_OUT)
+            {
+              cv::rectangle(img, initpos, curr_mousepos, cv::Scalar(0, 255, 0), 3);
+            }
         }
         cv::imshow("Target Selector", img);
         cv::waitKey(5);
