@@ -9,7 +9,7 @@ int main(int argc, char** argv)
 
     ROS_INFO("MERBOTS detection and tracking");
     merbots_tracking::ObjectDetector objdet(nh);
-    objdet.start();    
+    objdet.start();
 
     return 0;
 }
