@@ -206,8 +206,10 @@ namespace merbots_tracking
       roi_msg->point_bl.y = pts[2].y * params->det_resize_inv;
     }
 
-    // Publishing ROI
     roi_msg->exists_roi = (unsigned char) (existROI ? 1 : 0);
+    roi_msg->status = sdata->getStatus();
+
+    // Publishing ROI
     roi_pub.publish(roi_msg);
 
     // Publishing Inliers
