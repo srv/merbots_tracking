@@ -204,6 +204,8 @@ namespace merbots_tracking
       roi_msg->point_tr.y = pts[1].y * params->det_resize_inv;
       roi_msg->point_bl.x = pts[2].x * params->det_resize_inv;
       roi_msg->point_bl.y = pts[2].y * params->det_resize_inv;
+      roi_msg->point_br.x = pts[3].x * params->det_resize_inv;
+      roi_msg->point_br.y = pts[3].y * params->det_resize_inv;
     }
 
     roi_msg->exists_roi = (unsigned char) (existROI ? 1 : 0);
