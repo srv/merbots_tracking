@@ -5,6 +5,6 @@ inliers: 25
 resize: 0.5
 det_timer: 15.0
 use_camera: false
-detect_only: false
+detect_only: true
 tracker: kcf
 track_thresh: 0.8

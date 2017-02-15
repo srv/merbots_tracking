@@ -110,6 +110,8 @@ void TargetDetector::run()
                 {
                     sdata->setStatus(TRACKING);
                 }
+
+                sdata->setTargetFound(true);
             }
             else
             {
@@ -121,6 +123,8 @@ void TargetDetector::run()
                     roi.height = 0;
                     sdata->setROI(roi);
                 }
+
+                sdata->setTargetFound(false);
             }
         }
         sdata->mutex_upd_target.unlock();

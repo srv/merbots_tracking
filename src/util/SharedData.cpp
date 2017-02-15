@@ -137,6 +137,18 @@ bool SharedData::existsTarget()
     return !target.empty();
 }
 
+bool SharedData::getTargetFound()
+{
+    boost::mutex::scoped_lock lock(mutex_target);
+    return target_found;
+}
+
+void SharedData::setTargetFound(bool found)
+{
+    boost::mutex::scoped_lock lock(mutex_target);
+    target_found = found;
+}
+
 void SharedData::getTargetPoints(std::vector<cv::Point2f>& pts)
 {
     boost::mutex::scoped_lock lock(mutex_target);

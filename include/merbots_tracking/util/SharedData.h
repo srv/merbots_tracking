@@ -30,6 +30,8 @@ public:
     cv::Point2f getKeypoint(int index);
     void copyCurrentTarget(cv::Mat& image);
     bool existsTarget();
+    bool getTargetFound();
+    void setTargetFound(bool found);
     void getTargetPoints(std::vector<cv::Point2f>& pts);
     void setCurrentImage(const cv::Mat& image);
     cv::Mat getCurrentImage();
@@ -45,7 +47,8 @@ protected:
     SharedData() :
         status(DETECTION),
         target_ind(0),
-        last_inliers(0)
+        last_inliers(0),
+        target_found(false)
     {
         p = Params::getInstance();
     }
@@ -74,6 +77,7 @@ protected:
     cv::Mat target_descs;
     cv::flann::Index* target_ind;
     std::vector<cv::Point2f> target_pts;
+    bool target_found;
 
     boost::mutex mutex_cimage;
     cv::Mat curr_image;

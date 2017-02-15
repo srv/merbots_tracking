@@ -187,8 +187,7 @@ namespace merbots_tracking
   void ObjectDetector::publishData()
   {
     // Publishing the current ROI
-    cv::Rect roi = sdata->getROI();
-    bool existROI = roi.width > 0 && roi.height > 0;
+    bool existROI = sdata->getTargetFound();
 
     merbots_tracking::TargetPointsPtr roi_msg(new merbots_tracking::TargetPoints);
     std::vector<cv::Point2f> pts;
@@ -239,8 +238,6 @@ namespace merbots_tracking
 
       if (existROI)
       {
-        //            cv::rectangle(img, roi, cv::Scalar(0,0, 255), 2);
-
         cv::circle(img, cv::Point((int)pts[0].x, (int)pts[0].y), 3, cv::Scalar(0, 255, 0), -1);
         cv::circle(img, cv::Point((int)pts[1].x, (int)pts[1].y), 3, cv::Scalar(0, 255, 0), -1);
         cv::circle(img, cv::Point((int)pts[2].x, (int)pts[2].y), 3, cv::Scalar(0, 255, 0), -1);
