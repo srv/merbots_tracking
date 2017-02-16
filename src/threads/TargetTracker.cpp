@@ -96,88 +96,91 @@ void TargetTracker::run()
                 img_points = image;
             }
 
-            // Detecting and describing keypoints of the scene
-            std::vector<cv::KeyPoint> img_kps;
-            p->det_detector->detect(img_points, img_kps);
-            cv::Mat img_descs;
-            p->det_descriptor->compute(img_points, img_kps, img_descs);
-
-            // Matching descriptors of the current scene against the target
-            cv::Mat results;
-            cv::Mat dists;
-            sdata->searchKeypoints(img_descs, results, dists, 2);
-
-            // Filtering matchings using the NNDR
-            std::vector<cv::Point2f> mpts_obj, mpts_img;
-            for (unsigned int i = 0; i < img_descs.rows; i++)
+            if (!change_stat)
             {
-                if (results.at<int>(i, 0) >= 0 && results.at<int>(i, 1) >= 0
-                    && dists.at<float>(i, 0) < 0.8 * dists.at<float>(i, 1))
-                {
-                    cv::Point2f p = img_kps[i].pt;
-                    p.x += curr_roi.x;
-                    p.y += curr_roi.y;
-                    mpts_img.push_back(p);
-                    mpts_obj.push_back(sdata->getKeypoint(results.at<int>(i, 0)));
-                }
-            }
+                // Detecting and describing keypoints of the scene
+                std::vector<cv::KeyPoint> img_kps;
+                p->det_detector->detect(img_points, img_kps);
+                cv::Mat img_descs;
+                p->det_descriptor->compute(img_points, img_kps, img_descs);
 
-            // Estimating the homography
-            bool thereis_object = false;
-            cv::Mat homography;
-            cv::Mat ninliers;
-            if (mpts_img.size() > 7)
-            {
-                homography = cv::findHomography(mpts_obj, mpts_img, cv::RANSAC, p->det_rerror, ninliers);
+                // Matching descriptors of the current scene against the target
+                cv::Mat results;
+                cv::Mat dists;
+                sdata->searchKeypoints(img_descs, results, dists, 2);
 
-                // Counting the number of inliers
-                int total_inliers = 0;
-                for (int i = 0; i < ninliers.rows; i++)
+                // Filtering matchings using the NNDR
+                std::vector<cv::Point2f> mpts_obj, mpts_img;
+                for (unsigned int i = 0; i < img_descs.rows; i++)
                 {
-                    if ((unsigned int)ninliers.at<uchar>(i))
+                    if (results.at<int>(i, 0) >= 0 && results.at<int>(i, 1) >= 0
+                        && dists.at<float>(i, 0) < 0.8 * dists.at<float>(i, 1))
                     {
-                        total_inliers++;
+                        cv::Point2f p = img_kps[i].pt;
+                        p.x += curr_roi.x;
+                        p.y += curr_roi.y;
+                        mpts_img.push_back(p);
+                        mpts_obj.push_back(sdata->getKeypoint(results.at<int>(i, 0)));
                     }
                 }
 
-                //ROS_INFO("Inliers %i", total_inliers);
-
-                if (!homography.empty() && total_inliers > p->det_inliers)
+                // Estimating the homography
+                bool thereis_object = false;
+                cv::Mat homography;
+                cv::Mat ninliers;
+                if (mpts_img.size() > 7)
                 {
-                    thereis_object = true;
+                    homography = cv::findHomography(mpts_obj, mpts_img, cv::RANSAC, p->det_rerror, ninliers);
+
+                    // Counting the number of inliers
+                    int total_inliers = 0;
+                    for (int i = 0; i < ninliers.rows; i++)
+                    {
+                        if ((unsigned int)ninliers.at<uchar>(i))
+                        {
+                            total_inliers++;
+                        }
+                    }
+
+                    //ROS_INFO("Inliers %i", total_inliers);
+
+                    if (!homography.empty() && total_inliers > p->det_inliers)
+                    {
+                        thereis_object = true;
+                    }
+
+                    // Setting the current number of inliers
+                    sdata->setInliers(total_inliers);
                 }
 
-                // Setting the current number of inliers
-                sdata->setInliers(total_inliers);
-            }
-
-            // If the object is present in the image
-            if (thereis_object)
-            {
-                // Transforming points
-                std::vector<cv::Point2f> obj_corners(4);
-                sdata->getTargetPoints(obj_corners);
-                std::vector<cv::Point2f> scene_corners(4);
-                cv::perspectiveTransform(obj_corners, scene_corners, homography);
-
-                // Storing the transformed points
-                sdata->setScenePoints(scene_corners);
-
-                sdata->setTargetFound(true);
-            }
-            else
-            {
-                change_stat = true;
-                cv::Rect roi = sdata->getROI();
-                if (roi.width != 0 || roi.height != 0)
+                // If the object is present in the image
+                if (thereis_object)
                 {
-                    // Cleaning the current ROI
-                    roi.width = 0;
-                    roi.height = 0;
-                    sdata->setROI(roi);
-                }
+                    // Transforming points
+                    std::vector<cv::Point2f> obj_corners(4);
+                    sdata->getTargetPoints(obj_corners);
+                    std::vector<cv::Point2f> scene_corners(4);
+                    cv::perspectiveTransform(obj_corners, scene_corners, homography);
 
-                sdata->setTargetFound(false);
+                    // Storing the transformed points
+                    sdata->setScenePoints(scene_corners);
+
+                    sdata->setTargetFound(true);
+                }
+                else
+                {
+                    change_stat = true;
+                    cv::Rect roi = sdata->getROI();
+                    if (roi.width != 0 || roi.height != 0)
+                    {
+                        // Cleaning the current ROI
+                        roi.width = 0;
+                        roi.height = 0;
+                        sdata->setROI(roi);
+                    }
+
+                    sdata->setTargetFound(false);
+                }
             }
 
             if (change_stat)
